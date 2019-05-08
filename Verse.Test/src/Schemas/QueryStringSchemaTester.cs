@@ -41,7 +41,7 @@ namespace Verse.Test.Schemas
 			Assert.That(AdapterResolver.TryGetDecoderConverter<string, T>(schema.DecoderAdapter, out var converter),
 				Is.True);
 
-			schema.DecoderDescriptor.HasField(name, () => default, (ref T t, T v) => t = v).HasValue(converter);
+			schema.DecoderDescriptor.IsObject().HasField(name, (ref T t, T v) => t = v).IsValue(converter);
 
 			var value = QueryStringSchemaTester.Decode(schema, query);
 
@@ -61,8 +61,7 @@ namespace Verse.Test.Schemas
 			Assert.That(AdapterResolver.TryGetDecoderConverter<string, T>(schema.DecoderAdapter, out var converter),
 				Is.True);
 
-			schema.DecoderDescriptor.HasField(name, () => default, (ref T t, T v) => t = v)
-				.HasValue(converter);
+			schema.DecoderDescriptor.IsObject().HasField(name, (ref T t, T v) => t = v).IsValue(converter);
 
 			var value = QueryStringSchemaTester.Decode(schema, query);
 
@@ -76,7 +75,7 @@ namespace Verse.Test.Schemas
 		public void DecodeFail(string query)
 		{
 			var schema = new QueryStringSchema<string>();
-			var decoder = schema.CreateDecoder(() => string.Empty);
+			var decoder = schema.CreateDecoder();
 
 			using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(query)))
 			{
@@ -87,7 +86,7 @@ namespace Verse.Test.Schemas
 
 		private static TEntity Decode<TEntity>(ISchema<string, TEntity> schema, string query)
 		{
-			var decoder = schema.CreateDecoder(() => default);
+			var decoder = schema.CreateDecoder();
 
 			using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(query)))
 			{

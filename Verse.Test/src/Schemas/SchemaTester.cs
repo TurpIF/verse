@@ -13,12 +13,12 @@ namespace Verse.Test.Schemas
 		{
 			var schema = this.CreateSchema<int>();
 
-			schema.DecoderDescriptor.HasField("virtual").HasField("value", () => 0,
-				(ref int target, int source) => target = source).HasValue(schema.DecoderAdapter.ToInteger32S);
+			schema.DecoderDescriptor.IsObject().HasField("virtual").IsObject().HasField("value",
+				(ref int target, int source) => target = source).IsValue(schema.DecoderAdapter.ToInteger32S);
 			schema.EncoderDescriptor.HasField("virtual").HasField("value", source => source)
 				.HasValue(schema.EncoderAdapter.FromInteger32S);
 
-			SchemaTester<TNative>.AssertRoundTrip(schema.CreateDecoder(() => 0), schema.CreateEncoder(), 17);
+			SchemaTester<TNative>.AssertRoundTrip(schema.CreateDecoder(), schema.CreateEncoder(), 17);
 		}
 
 		[Test]
