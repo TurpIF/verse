@@ -8,7 +8,6 @@
     <Authors>Remi Caput</Authors>
     <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageIconUrl>https://raw.github.com/r3c/verse/master/icon.png</PackageIconUrl>
     <PackageId>Verse</PackageId>

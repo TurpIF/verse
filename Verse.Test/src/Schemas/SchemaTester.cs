@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Verse.Test.Schemas
 {
-	public abstract class SchemaTester
+	public abstract class SchemaTester<TNative>
 	{
 		[Test]
 		public void RoundTripFieldFlatten()
@@ -14,10 +14,11 @@ namespace Verse.Test.Schemas
 			var schema = this.CreateSchema<int>();
 
 			schema.DecoderDescriptor.HasField("virtual").HasField("value", () => 0,
-				(ref int target, int source) => target = source).HasValue();
-			schema.EncoderDescriptor.HasField("virtual").HasField("value", source => source).HasValue();
+				(ref int target, int source) => target = source).HasValue(schema.DecoderAdapter.ToInteger32S);
+			schema.EncoderDescriptor.HasField("virtual").HasField("value", source => source)
+				.HasValue(schema.EncoderAdapter.FromInteger32S);
 
-			SchemaTester.AssertRoundTrip(schema.CreateDecoder(() => 0), schema.CreateEncoder(), 17);
+			SchemaTester<TNative>.AssertRoundTrip(schema.CreateDecoder(() => 0), schema.CreateEncoder(), 17);
 		}
 
 		[Test]
@@ -27,7 +28,7 @@ namespace Verse.Test.Schemas
 			var decoder = Linker.CreateDecoder(schema);
 			var encoder = Linker.CreateEncoder(schema);
 
-			SchemaTester.AssertRoundTrip(decoder, encoder, new NestedArray
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, new NestedArray
 			{
 				children = new[]
 				{
@@ -38,7 +39,7 @@ namespace Verse.Test.Schemas
 					},
 					new NestedArray
 					{
-						children = new []
+						children = new[]
 						{
 							new NestedArray
 							{
@@ -71,9 +72,9 @@ namespace Verse.Test.Schemas
 			var decoder = Linker.CreateDecoder(schema);
 			var encoder = Linker.CreateEncoder(schema);
 
-			SchemaTester.AssertRoundTrip(decoder, encoder, new MixedContainer
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, new MixedContainer
 			{
-				floats = new[] { 1.1f, 2.2f, 3.3f },
+				floats = new[] {1.1f, 2.2f, 3.3f},
 				integer = 17,
 				option = SomeEnum.B,
 				pairs = new Dictionary<string, string>
@@ -92,7 +93,7 @@ namespace Verse.Test.Schemas
 			var decoder = Linker.CreateDecoder(schema);
 			var encoder = Linker.CreateEncoder(schema);
 
-			SchemaTester.AssertRoundTrip(decoder, encoder, new NestedValue
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, new NestedValue
 			{
 				child = new NestedValue
 				{
@@ -116,7 +117,7 @@ namespace Verse.Test.Schemas
 			var decoder = Linker.CreateDecoder(schema);
 			var encoder = Linker.CreateEncoder(schema);
 
-			SchemaTester.AssertRoundTrip(decoder, encoder, instance);
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, instance);
 		}
 
 		[Test]
@@ -127,8 +128,8 @@ namespace Verse.Test.Schemas
 			var decoder = Linker.CreateDecoder(schema);
 			var encoder = Linker.CreateEncoder(schema);
 
-			SchemaTester.AssertRoundTrip(decoder, encoder, null);
-			SchemaTester.AssertRoundTrip(decoder, encoder, 42);
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, null);
+			SchemaTester<TNative>.AssertRoundTrip(decoder, encoder, 42);
 		}
 
 		protected static void AssertRoundTrip<T>(IDecoder<T> decoder, IEncoder<T> encoder, T instance)
@@ -153,7 +154,8 @@ namespace Verse.Test.Schemas
 
 			var comparisonResult = new CompareLogic().Compare(instance, decoded);
 
-			CollectionAssert.IsEmpty(comparisonResult.Differences, $"differences found after decoding entity: {comparisonResult.DifferencesString}");
+			CollectionAssert.IsEmpty(comparisonResult.Differences,
+				$"differences found after decoding entity: {comparisonResult.DifferencesString}");
 
 			using (var stream = new MemoryStream())
 			{
@@ -166,7 +168,7 @@ namespace Verse.Test.Schemas
 			CollectionAssert.AreEqual(encoded1, encoded2);
 		}
 
-		protected abstract ISchema<T> CreateSchema<T>();
+		protected abstract ISchema<TNative, TEntity> CreateSchema<TEntity>();
 
 		private class MixedContainer
 		{

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -72,7 +74,10 @@ namespace Verse.Test
 		public void LinkDecoderVisibility(BindingFlags bindings, string json, string expected)
 		{
 			var encoded = Encoding.UTF8.GetBytes(json);
-			var decoded = LinkerTester.Decode(Linker.CreateDecoder(new JSONSchema<Visibility>(), bindings), encoded);
+			var decoded =
+				LinkerTester.Decode(
+					Linker.CreateDecoder(new JSONSchema<Visibility>(), new Dictionary<Type, object>(), bindings),
+					encoded);
 
 			Assert.AreEqual(expected, decoded.ToString());
 		}
@@ -137,7 +142,10 @@ namespace Verse.Test
 		public void LinkEncoderVisibility(BindingFlags bindings, string expected)
 		{
 			var decoded = new Visibility();
-			var encoded = LinkerTester.Encode(Linker.CreateEncoder(new JSONSchema<Visibility>(), bindings), decoded);
+			var encoded =
+				LinkerTester.Encode(
+					Linker.CreateEncoder(new JSONSchema<Visibility>(), new Dictionary<Type, object>(), bindings),
+					decoded);
 
 			Assert.AreEqual(expected, Encoding.UTF8.GetString(encoded));
 		}
